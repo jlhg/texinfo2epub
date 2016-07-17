@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+checkcmd() {
+  if ! $(hash $1 2>/dev/null); then
+    echo "$1 command is required."
+    exit 1
+  fi
+}
+
+checkcmd makeinfo
+checkcmd xsltproc
+checkcmd zip
+
+INPUT_FILE=$1
+OUTPUT_FILE=$2
+
+if [[ -z $INPUT_FILE ]] || [[ -z $OUTPUT_FILE ]]; then
+  echo ""
+  echo "Usage:"
+  echo "  ./texinfo2epub.sh input.texi output.epub"
+  echo ""
+  exit
+fi
+
+if [[ ! -f $INPUT_FILE ]]; then
+  echo "File ${INPUT_FILE} does not exist."
+  exit 1
+fi
+
+INPUT_FILE_PATH=$(cd $(dirname $INPUT_FILE) && pwd)/$(basename $INPUT_FILE)
+OUTPUT_FILE_PATH=$(cd $(dirname $OUTPUT_FILE) && pwd)/$(basename $OUTPUT_FILE)
+SCRIPT_DIR=$(cd $(dirname $0) && pwd)
+EPUB_XSL=$SCRIPT_DIR/docbook-xsl-1.78.1/epub/docbook.xsl
+TMP_DIR=$(mktemp -d -p $(pwd) -t temp-texinfo2epub-XXXX)
+trap "rm -rf $TMP_DIR" EXIT
+
+cd $TMP_DIR
+makeinfo --docbook $INPUT_FILE_PATH -o out.xml
+xsltproc $EPUB_XSL out.xml
+echo "application/epub+zip" > mimetype
+zip -0Xq $OUTPUT_FILE_PATH mimetype
+zip -Xr9D $OUTPUT_FILE_PATH META-INF OEBPS
