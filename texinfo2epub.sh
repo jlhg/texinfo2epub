@@ -40,4 +40,5 @@ makeinfo --docbook $INPUT_FILE_PATH -o out.xml
 xsltproc $EPUB_XSL out.xml
 echo "application/epub+zip" > mimetype
 zip -0Xq $OUTPUT_FILE_PATH mimetype
+./copy-media.py OEBPS/content.opf $INPUT_FILE_PATH
 zip -Xr9D $OUTPUT_FILE_PATH META-INF OEBPS
