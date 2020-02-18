@@ -28,7 +28,7 @@ if [[ ! -f $INPUT_FILE ]]; then
   exit 1
 fi
 
-PWD=$(pwd)
+CURRENT_PATH=$(pwd)
 INPUT_FILE_PATH=$(cd $(dirname $INPUT_FILE) && pwd)/$(basename $INPUT_FILE)
 OUTPUT_FILE_PATH=$(cd $(dirname $OUTPUT_FILE) && pwd)/$(basename $OUTPUT_FILE)
 SCRIPT_DIR=$(cd $(dirname $0) && pwd)
@@ -41,5 +41,5 @@ makeinfo --docbook $INPUT_FILE_PATH -o out.xml
 xsltproc $EPUB_XSL out.xml
 echo "application/epub+zip" > mimetype
 zip -0Xq $OUTPUT_FILE_PATH mimetype
-$PWD/copy-media.py OEBPS/content.opf $INPUT_FILE_PATH
+$CURRENT_PATH/copy-media.py OEBPS/content.opf $(dirname $INPUT_FILE_PATH)
 zip -Xr9D $OUTPUT_FILE_PATH META-INF OEBPS
