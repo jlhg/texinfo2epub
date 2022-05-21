@@ -28,11 +28,23 @@ if [[ ! -f $INPUT_FILE ]]; then
   exit 1
 fi
 
+create_tmp_dir() {
+  local tdir
+  case "$(uname -s)" in
+    Darwin*)
+      tdir=$(mktemp -d $PWD/temp-texinfo2epub-XXXX);;
+    *)
+      tdir=$(mktemp -d -p $PWD -t temp-texinfo2epub-XXXX);;
+  esac
+
+  echo ${tdir}
+}
+
 INPUT_FILE_PATH=$(cd $(dirname $INPUT_FILE) && pwd)/$(basename $INPUT_FILE)
 OUTPUT_FILE_PATH=$(cd $(dirname $OUTPUT_FILE) && pwd)/$(basename $OUTPUT_FILE)
 SCRIPT_DIR=$(cd $(dirname $0) && pwd)
 EPUB_XSL=$SCRIPT_DIR/docbook-xsl-1.79.2/epub/docbook.xsl
-TMP_DIR=$(mktemp -d -p $(pwd) -t temp-texinfo2epub-XXXX)
+TMP_DIR=$(create_tmp_dir)
 trap "rm -rf $TMP_DIR" EXIT
 
 cd $TMP_DIR
